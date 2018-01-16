@@ -27,8 +27,25 @@ def words2Vec(vocabulist,input):
 
 
 
+def trainNB0(trainMatrix,trainCategory):
+	num_word = len(trainMatrix[0])
+	p1vec = [0]*num_word
+	p0vec = [0]*num_word
+	pabusive = sum(trainCategory)/float(len(trainMatrix))
+	for i in range(len(trainMatrix)):
+		if trainCategory[i] == 1:
+			p1vec += trainMatrix[i]
+		else:
+			p0vec += trainMatrix[i]
+	print(p0vec/sum(p0vec))
+	print(p1vec/sum(p1vec))
+	print(pabusive)
 
 dataSet,labels = loadDataSet()
 vocabulist = createVocabulist(dataSet)
+dataMatrix = []
 for inputData in dataSet:
-	print(words2Vec(vocabulist,inputData))
+	dataMatrix.append(words2Vec(vocabulist,inputData))
+
+# print(dataMatrix)
+trainNB0(np.array(dataMatrix),labels)
