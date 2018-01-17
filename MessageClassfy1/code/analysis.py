@@ -3,14 +3,16 @@ import numpy as np
 import pandas as pd
 import re
 import nltk
+import pandas as pd
 from nltk.corpus import stopwords
+import bayes
 inputfile = '../data/train.csv'
+testfile = '../data/test.csv'
 
 
 
-
-def getData():
-	csv_reader = csv.reader(open(inputfile,encoding='utf-8'))
+def getData(path):
+	csv_reader = csv.reader(open(path,encoding='utf-8'))
 	data = np.array(list(csv_reader)[1:])
 	return data
 
@@ -19,8 +21,14 @@ def convert(label):
 	return 0 if label == 'ham' else 1
 
 
-def getLabelsAndContens():
-	data = getData()
+def getTestIdsAndContents(path):
+	data = getData(path)
+	labels = [arr[0] for arr in data]
+	contents = [arr[1] for arr in data]
+	return labels,contents
+
+def getLabelsAndContens(path):
+	data = getData(path)
 	labels = [convert(arr[0]) for arr in data]
 	contents = [arr[1] for arr in data]
 	return labels,contents
@@ -50,13 +58,16 @@ class StemmedTfidfVectorizer(TfidfVectorizer):
 		return lambda doc:(english_stemmer.stem(w) for w in analyzer(doc))
 
 
-labels,contents = getLabelsAndContens()
+
+labels,contents = getLabelsAndContens(inputfile)
+ids,test_contents = getTestIdsAndContents(testfile)
+print(ids,test_contents)
 # from sklearn.feature_extraction.text import CountVectorizer
 vectorizer = StemmedTfidfVectorizer(min_df=1,stop_words='english')
 contents = [dealWithContent(sentence) for sentence in contents]
 train = vectorizer.fit_transform(contents)
-print(train.shape)
-print(vectorizer.get_feature_names())
+# print(train.shape)
+# print(vectorizer.get_feature_names())
 # new_post = "bitching attended"
 # new_post_vec = vectorizer.transform([new_post])
 # print(new_post_vec)
@@ -69,12 +80,38 @@ def getConvertData(contents,vectorizer):
 		# print("-----------------------------")
 	return np.array(data_set)
 
+labesl_des = ['ham','spam']
 
-from sklearn.decomposition import PCA
-pca = PCA(n_components=10)
 data_set = getConvertData(contents,vectorizer)
-new_data = pca.fit_transform(data_set)
-print(new_data)
+test_data_set = getConvertData(test_contents,vectorizer)
+print(test_data_set)
+data_set = data_set*10
+p0,p1,pa = bayes.trainNB0(data_set,labels)
+print(p0)
+print(p1)
+print(pa)
+res_arr = []
+for i in range(len(ids)):
+	aid = ids[i]
+	test_data = test_data_set[i]
+	res = bayes.classfy(test_data,p0,p1,pa)
+	res_arr.append([aid,labesl_des[res]])
+	print(aid,labesl_des[res])
+
+data_frame = pd.DataFrame(res_arr,columns=['SmsId','Label'],index=None)
+data_frame.to_csv('submission1.csv')
+print(data_frame.values)
+
+
+
+
+
+
+# from sklearn.decomposition import PCA
+# pca = PCA(n_components=10)
+# data_set = getConvertData(contents,vectorizer)
+# new_data = pca.fit_transform(data_set)
+# print(new_data)
 
 
 
