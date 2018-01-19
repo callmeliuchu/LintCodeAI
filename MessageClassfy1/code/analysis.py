@@ -6,6 +6,7 @@ import nltk
 import pandas as pd
 from nltk.corpus import stopwords
 import bayes
+import bayse_1
 inputfile = '../data/train.csv'
 testfile = '../data/test.csv'
 
@@ -60,17 +61,35 @@ class StemmedTfidfVectorizer(TfidfVectorizer):
 
 
 labels,contents = getLabelsAndContens(inputfile)
+
+
 ids,test_contents = getTestIdsAndContents(testfile)
-print(ids,test_contents)
+# print(ids,test_contents)
 # from sklearn.feature_extraction.text import CountVectorizer
 vectorizer = StemmedTfidfVectorizer(min_df=1,stop_words='english')
 contents = [dealWithContent(sentence) for sentence in contents]
+
+def getSimpleDataSet(contents):
+	dataSet = []
+	for sentence in contents:
+		dataSet.append(sentence.split())
+	return dataSet
+
+dataSet = getSimpleDataSet(contents)
+# bayes = bayse_1.Bayes(dataSet,labels)
+
+
 train = vectorizer.fit_transform(contents)
 # print(train.shape)
 # print(vectorizer.get_feature_names())
 # new_post = "bitching attended"
 # new_post_vec = vectorizer.transform([new_post])
 # print(new_post_vec)
+
+
+
+
+
 def getConvertData(contents,vectorizer):
 	data_set = []
 	for sentence in contents:
@@ -80,8 +99,12 @@ def getConvertData(contents,vectorizer):
 		# print("-----------------------------")
 	return np.array(data_set)
 
-labesl_des = ['ham','spam']
 
+
+
+
+
+labesl_des = ['ham','spam']
 data_set = getConvertData(contents,vectorizer)
 test_data_set = getConvertData(test_contents,vectorizer)
 print(test_data_set)
@@ -98,9 +121,9 @@ for i in range(len(ids)):
 	res_arr.append([aid,labesl_des[res]])
 	print(aid,labesl_des[res])
 
-data_frame = pd.DataFrame(res_arr,columns=['SmsId','Label'],index=None)
-data_frame.to_csv('submission1.csv')
-print(data_frame.values)
+# data_frame = pd.DataFrame(res_arr,columns=['SmsId','Label'],index=None)
+# data_frame.to_csv('submission1.csv')
+# print(data_frame.values)
 
 
 
