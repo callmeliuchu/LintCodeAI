@@ -6,7 +6,6 @@ import nltk
 import pandas as pd
 from nltk.corpus import stopwords
 import bayes
-import bayse_1
 inputfile = '../data/train.csv'
 testfile = '../data/test.csv'
 
