@@ -1,5 +1,5 @@
 import pandas as pd
-
+import numpy as np
 
 train_data = pd.read_csv('../data/train.csv')
 test_data = pd.read_csv('../data/test.csv')
@@ -37,7 +37,7 @@ combine = [train_data,test_data]
 # print(train_data)
 # print(train_data.describe())
 
-print(train_data)
+# print(train_data)
 # passenger types
 #    Pclass  Survived
 # 0       1  0.629630
@@ -93,3 +93,111 @@ for dataSet in combine:
 # 1        1  0.303538
 # isAlone_res = train_data[['IsAlone','Survived']].groupby(['IsAlone'],as_index=False).mean().sort_values(by='Survived',ascending=False)
 # print(isAlone_res)
+# print(train_data)
+
+# delete the useless features
+# for dataSet in combine:
+# 	dataSet = dataSet.drop(['Ticket','Cabin'],axis=1)
+
+train = train_data.drop(['Ticket','Cabin'],axis=1)
+test = test_data.drop(['Ticket','Cabin'],axis=1)
+combine = [train,test]
+# print(train_data)
+# print(train.dtypes)
+
+for dataSet in combine:
+	dataSet['Salutation'] = dataSet['Name'].str.extract(' ([A-Za-z]+)\.',expand=False)
+
+
+#   Salutation  Survived
+# 0     Master  0.575000
+# 1       Miss  0.702703
+# 2         Mr  0.156673
+# 3        Mrs  0.793651
+# 4       Rare  0.347826
+for dataset in combine:
+    dataset['Salutation'] = dataset['Salutation'].replace(['Lady', 'Countess', 'Capt', 'Col', 'Don', 'Dr', 'Major', 'Rev', 'Sir', 'Jonkheer', 'Dona'], 'Rare')
+    dataset['Salutation'] = dataset['Salutation'].replace('Mlle', 'Miss')
+    dataset['Salutation'] = dataset['Salutation'].replace('Ms', 'Miss')
+    dataset['Salutation'] = dataset['Salutation'].replace('Mme', 'Mrs')
+# Salutation_result = train[['Salutation','Survived']].groupby(['Salutation'],as_index=False).mean()
+# print(Salutation_result)
+# so = train.Salutation
+# for d in so:
+# 	print(d)
+
+Salutation_mapping = {'Mr':1,"Miss":2,"Mrs":3,"Master":4,"Rare":5}
+for dataSet in combine:
+	dataSet['Salutation'] = dataSet['Salutation'].map(Salutation_mapping)
+	dataSet['Salutation'] = dataSet['Salutation'].fillna(0)
+# print(train['Salutation'])
+# print(train.head())
+# print(train.dtypes)
+
+train = train.drop(['Name','PassengerId'],axis=1)
+test = test.drop(['Name'],axis=1)
+combine = [train,test]
+# print(test)
+
+
+for dataSet in combine:
+	dataSet['Sex'] = dataSet['Sex'].map({'female':0,'male':1}).astype(int)
+# print(train)
+# print(train.dtypes)
+guess_ages = np.zeros((2,3))
+# print(guess_ages)
+for dataSet in combine:
+	for i in range(0,2):
+		for j in range(0,3):
+			guess = dataSet[(dataSet['Sex'] == i) & (dataSet['Pclass'] == j+1)]['Age'].dropna()
+			# print(guess.median())
+			age_guess = guess.median()
+			guess_ages[i,j] = int(age_guess/0.5 + 0.5)*0.5
+
+	for i in range(0,2):
+		for j in range(0,3):
+			dataSet.loc[(dataSet['Age'].isnull()) & (dataSet['Sex'] == i) & (dataSet['Pclass'] == j+1),'Age'] = guess_ages[i,j]
+
+	dataSet['Age'] = dataSet['Age'].astype(int)
+
+# band = pd.cut(train['Age'],5)
+train['AgeBand'] = pd.cut(train['Age'],5)
+AgeBand_result = train[['AgeBand','Survived']].groupby(['AgeBand'],as_index=False).mean().sort_values(by='AgeBand',ascending=True)
+
+
+for dataset in combine:
+    dataset.loc[dataset['Age'] <= 16, 'Age'] = 0
+    dataset.loc[(dataset['Age'] > 16) & (dataset['Age'] <= 32), 'Age'] = 1
+    dataset.loc[(dataset['Age'] > 32) & (dataset['Age'] <= 48), 'Age'] = 2
+    dataset.loc[(dataset['Age'] > 48) & (dataset['Age'] <= 64), 'Age'] = 3
+    dataset.loc[dataset['Age'] > 64, 'Age'] = 4
+
+train = train.drop(['AgeBand'],axis=1)
+combine = [train,test]
+
+# 2  (26, 512.329]  0.559322
+# 1    (8.662, 26]  0.402778
+# 0     [0, 8.662]  0.198052
+# train['Fare'] = pd.qcut(train['Fare'],3)
+# Fare_result = train[['Fare','Survived']].groupby(['Fare'],as_index=False).mean().sort_values(by='Survived',ascending=False)
+# print(Fare_result)
+test['Fare'].fillna(test['Fare'].dropna().median(),inplace=True)
+# print(train['Fare'].isnull().sum())
+
+
+# train['FareBand'] = pd.qcut(train['Fare'],3)
+# print(train)
+
+
+for dataSet in combine:
+	dataSet['Age*Class'] = dataSet.Age*dataSet.Pclass
+# s = train.loc[:,['Age*Class','Age','Pclass']].head(10)
+# print(s)
+for dataset in combine:
+    dataset.loc[dataset['Fare'] <= 7.91, 'Fare'] = 0
+    dataset.loc[(dataset['Fare'] > 7.91) & (dataset['Fare'] <= 14.454), 'Fare'] = 1
+    dataset.loc[(dataset['Fare'] > 14.454) & (dataset['Fare'] <= 31), 'Fare'] = 2
+    dataset.loc[dataset['Fare'] > 31, 'Fare'] = 3
+    dataset['Fare'] = dataset['Fare'].astype(int)
+
+print(train)
