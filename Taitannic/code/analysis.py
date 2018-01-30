@@ -1,6 +1,9 @@
 import pandas as pd
 import numpy as np
 
+from sklearn.linear_model import LogisticRegression
+from sklearn.tree import DecisionTreeClassifier
+
 train_data = pd.read_csv('../data/train.csv')
 test_data = pd.read_csv('../data/test.csv')
 # train = train.drop(['PassengerId'],axis=1)
@@ -200,4 +203,48 @@ for dataset in combine:
     dataset.loc[dataset['Fare'] > 31, 'Fare'] = 3
     dataset['Fare'] = dataset['Fare'].astype(int)
 
-print(train)
+#   Embarked  Survived
+# 0        C  0.553571
+# 1        Q  0.389610
+# 2        S  0.336957
+# res = train[['Embarked','Survived']].groupby(['Embarked'],as_index=False).mean().sort_values(by='Survived',ascending=False)
+# print(res)
+
+# train['Embarked'].fillna(train['Embarked'].dropna().mode(),inplace=False)
+# print(train['Embarked'].dropna().mode())
+# print(train['Embarked'].isnull().sum())
+
+freq_port = train['Embarked'].dropna()[0]
+for dataSet in combine:
+	dataSet['Embarked'] = dataSet['Embarked'].dropna().mode()[0]
+# print(train['Embarked'].isnull().sum())
+
+for dataSet in combine:
+	dataSet['Embarked'] = dataSet['Embarked'].map({'S':0,'C':1,'Q':2}).astype(int)
+
+# print(train)
+# test = test.drop(['PassengerId'],axis=1)
+# print(test)
+
+# print(train)
+
+X_train = train.drop(['Survived'],axis=1)
+Y_train = train['Survived']
+X_test = test.drop('PassengerId',axis=1).copy()
+
+# logreg = LogisticRegression()
+# logreg.fit(X_train,Y_train)
+# Y_pred = logreg.predict(X_test)
+# print(Y_pred)
+
+decision_tree = DecisionTreeClassifier()
+decision_tree.fit(X_train,Y_train)
+Y_pred = decision_tree.predict(X_test)
+
+
+submission = pd.DataFrame({
+	"PassengerId":test["PassengerId"],
+	"Survived":Y_pred
+	})
+print(submission)
+submission.to_csv("../tmp/submission_decision.csv")
