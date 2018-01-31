@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-
+import decision_tree as dt
 from sklearn.linear_model import LogisticRegression
 from sklearn.tree import DecisionTreeClassifier
 
@@ -228,23 +228,40 @@ for dataSet in combine:
 
 # print(train)
 
-X_train = train.drop(['Survived'],axis=1)
-Y_train = train['Survived']
-X_test = test.drop('PassengerId',axis=1).copy()
+# X_train = train.drop(['Survived'],axis=1)
+# Y_train = train['Survived']
+# X_test = test.drop('PassengerId',axis=1).copy()
+
+
+X_train = train
+X_labels = train.columns
+columns = ['Pclass', 'Sex', 'Age', 'SibSp', 'Parch', 'Fare','Embarked', 'FamilySize', 'IsAlone', 'Salutation', 'Age*Class','Survived']
+dataSet = train[columns].as_matrix()
+labels = columns
+tree = dt.createTree(dataSet,columns)
+print(tree)
+# print(dataSet)
+# print(X_train.columns)
+# print(test.columns)
+# print(X_labels)
+# print(X_train)
+# print(Y_train)
+
+
 
 # logreg = LogisticRegression()
 # logreg.fit(X_train,Y_train)
 # Y_pred = logreg.predict(X_test)
 # print(Y_pred)
 
-decision_tree = DecisionTreeClassifier()
-decision_tree.fit(X_train,Y_train)
-Y_pred = decision_tree.predict(X_test)
+# decision_tree = DecisionTreeClassifier()
+# decision_tree.fit(X_train,Y_train)
+# Y_pred = decision_tree.predict(X_test)
 
 
-submission = pd.DataFrame({
-	"PassengerId":test["PassengerId"],
-	"Survived":Y_pred
-	})
-print(submission)
-submission.to_csv("../tmp/submission_decision.csv")
+# submission = pd.DataFrame({
+# 	"PassengerId":test["PassengerId"],
+# 	"Survived":Y_pred
+# 	})
+# print(submission)
+# submission.to_csv("../tmp/submission_decision.csv")
