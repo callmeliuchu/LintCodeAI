@@ -238,8 +238,20 @@ X_labels = train.columns
 columns = ['Pclass', 'Sex', 'Age', 'SibSp', 'Parch', 'Fare','Embarked', 'FamilySize', 'IsAlone', 'Salutation', 'Age*Class','Survived']
 dataSet = train[columns].as_matrix()
 labels = columns
+test_columns = ['Pclass', 'Sex', 'Age', 'SibSp', 'Parch', 'Fare','Embarked', 'FamilySize', 'IsAlone', 'Salutation', 'Age*Class']
 tree = dt.createTree(dataSet,columns)
-print(tree)
+test_data = test[test_columns].as_matrix()
+res_arr = []
+for vec in test_data:
+	res = dt.classify(tree,test_columns,vec)
+	res_arr.append(res)
+submission = pd.DataFrame({
+	"PassengerId":test["PassengerId"],
+	"Survived":res_arr
+	})
+print(submission)
+submission.to_csv("../tmp/decision_tree_of_submission_decision.csv")
+
 # print(dataSet)
 # print(X_train.columns)
 # print(test.columns)

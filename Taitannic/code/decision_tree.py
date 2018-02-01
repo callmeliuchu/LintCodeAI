@@ -51,16 +51,28 @@ def createTree(dataSet,labels):
 	bestSplit = chooseBestSplit(dataSet)
 	label = labels[bestSplit]
 	myTree = {label:{}}
-	del labels[bestSplit]
 	features = [vec[bestSplit] for vec in dataSet]
 	featureSet = set(features)
 	for value in featureSet:
 		data = splitDataSet(dataSet,bestSplit,value)
-		newLables = labels[:]
+		newLables = labels[:bestSplit] + labels[bestSplit+1:] 
 		myTree[label][value] = createTree(data,newLables)
 	return myTree
 
 
+def classify(inputTree,featLabels,testVec):
+	firstStr = list(inputTree.keys())[0]
+	secondDict = inputTree[firstStr]
+	featIndex = featLabels.index(firstStr)
+	classLabel = 0
+	for key in secondDict:
+		if testVec[featIndex] == key:
+			if type(secondDict[key]).__name__ == 'dict':
+				classLabel = classify(secondDict[key],featLabels,testVec)
+			else:
+				classLabel = secondDict[key]
+	return classLabel
+	# print(featIndext)
 # a = [1,1,1,1,2,3,3,3,3,3,3]
 # val = Counter(a).most_common(1)[0][0]
 # print(val)
@@ -73,13 +85,7 @@ def createTree(dataSet,labels):
 
 
 
-# dataSet,labels = createDataSet()
-# tree = createTree(dataSet,labels)
-# print(tree)
-# print(dataSet)
-# print(labels)
-# print(calShanno(dataSet))
-# print(dataSet)
-# data = splitDataSet(dataSet,0,0)
-# print(data)
-# print(chooseBestSplit(dataSet))
+dataSet,labels = createDataSet()
+tree = createTree(dataSet,labels)
+label = classify(tree,labels,[1,1])
+print(label)
