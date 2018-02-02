@@ -250,7 +250,7 @@ submission = pd.DataFrame({
 	"Survived":res_arr
 	})
 print(submission)
-submission.to_csv("../tmp/decision_tree_of_submission_decision.csv")
+# submission.to_csv("../tmp/decision_tree_of_submission_decision.csv")
 
 # print(dataSet)
 # print(X_train.columns)
