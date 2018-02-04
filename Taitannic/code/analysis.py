@@ -3,7 +3,7 @@ import numpy as np
 import decision_tree as dt
 from sklearn.linear_model import LogisticRegression
 from sklearn.tree import DecisionTreeClassifier
-
+import kneighbor as knn
 train_data = pd.read_csv('../data/train.csv')
 test_data = pd.read_csv('../data/test.csv')
 # train = train.drop(['PassengerId'],axis=1)
@@ -232,24 +232,26 @@ for dataSet in combine:
 # Y_train = train['Survived']
 # X_test = test.drop('PassengerId',axis=1).copy()
 
+# -----------------------------------------------------------------------------
 
-X_train = train
-X_labels = train.columns
-columns = ['Pclass', 'Sex', 'Age', 'SibSp', 'Parch', 'Fare','Embarked', 'FamilySize', 'IsAlone', 'Salutation', 'Age*Class','Survived']
-dataSet = train[columns].as_matrix()
-labels = columns
-test_columns = ['Pclass', 'Sex', 'Age', 'SibSp', 'Parch', 'Fare','Embarked', 'FamilySize', 'IsAlone', 'Salutation', 'Age*Class']
-tree = dt.createTree(dataSet,columns)
-test_data = test[test_columns].as_matrix()
-res_arr = []
-for vec in test_data:
-	res = dt.classify(tree,test_columns,vec)
-	res_arr.append(res)
-submission = pd.DataFrame({
-	"PassengerId":test["PassengerId"],
-	"Survived":res_arr
-	})
-print(submission)
+# # decision tree
+# X_train = train
+# X_labels = train.columns
+# columns = ['Pclass', 'Sex', 'Age', 'SibSp', 'Parch', 'Fare','Embarked', 'FamilySize', 'IsAlone', 'Salutation', 'Age*Class','Survived']
+# dataSet = train[columns].as_matrix()
+# labels = columns
+# test_columns = ['Pclass', 'Sex', 'Age', 'SibSp', 'Parch', 'Fare','Embarked', 'FamilySize', 'IsAlone', 'Salutation', 'Age*Class']
+# tree = dt.createTree(dataSet,columns)
+# test_data = test[test_columns].as_matrix()
+# res_arr = []
+# for vec in test_data:
+# 	res = dt.classify(tree,test_columns,vec)
+# 	res_arr.append(res)
+# submission = pd.DataFrame({
+# 	"PassengerId":test["PassengerId"],
+# 	"Survived":res_arr
+# 	})
+# print(submission)
 # submission.to_csv("../tmp/decision_tree_of_submission_decision.csv")
 
 # print(dataSet)
@@ -260,7 +262,7 @@ print(submission)
 # print(Y_train)
 
 
-
+# -----------------------------------------------------------------------------
 # logreg = LogisticRegression()
 # logreg.fit(X_train,Y_train)
 # Y_pred = logreg.predict(X_test)
@@ -277,3 +279,28 @@ print(submission)
 # 	})
 # print(submission)
 # submission.to_csv("../tmp/submission_decision.csv")
+
+
+
+
+# -----------------------------------------------------------------------------
+
+# # knn
+# columns = ['Pclass', 'Sex', 'Age', 'SibSp', 'Parch', 'Fare','Embarked', 'FamilySize', 'IsAlone', 'Salutation', 'Age*Class']
+# X_train = train[columns].as_matrix()
+# labels = train['Survived'].as_matrix()
+# X_test = test[columns].as_matrix()
+# min_arr,range_arr,normal_data = knn.normalDataSet(X_train)
+# reslist = []
+# for test_vec in X_test:
+# 	vec = knn.normal_vec(min_arr,range_arr,test_vec)
+# 	label = knn.knn_nearest(vec,normal_data,labels)
+# 	reslist.append(label)
+
+# submission = pd.DataFrame({
+# 	"PassengerId":test["PassengerId"],
+# 	"Survived":reslist
+# 	})
+# submission.to_csv("../tmp/knn_of_submission_decision_2.csv")	
+
+# -----------------------------------------------------------------------------
