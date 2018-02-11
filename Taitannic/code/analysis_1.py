@@ -155,3 +155,36 @@ fareband_res = train[['FareBand','Survived']].groupby(['FareBand'],as_index=Fals
 # print(fareband_res)
 
 
+# print(train.dtypes)
+# for column in columns:
+# 	if column in train:
+# 		print(train[column].isnull().sum())
+
+for dataSet in combine:
+	dataSet['Salutation'] = dataSet.Name.str.extract(' ([A-Za-z]+)\.',expand=False)
+
+for dataSet in combine:
+	dataSet['Salutation'] = dataSet['Salutation'].replace(['Lady', 'Countess', 'Capt', 'Col', 'Don', 'Dr', 'Major', 'Rev', 'Sir', 'Jonkheer', 'Dona'],'Rare')
+	dataSet['Salutation'] = dataSet['Salutation'].replace('Mlle','Miss')
+	dataSet['Salutation'] = dataSet['Salutation'].replace('Ms','Miss')
+	dataSet['Salutation'] = dataSet['Salutation'].replace('Mme','Mrs')
+
+#   Salutation  Survived
+# 3        Mrs  0.793651
+# 1       Miss  0.702703
+# 0     Master  0.575000
+# 4       Rare  0.347826
+# 2         Mr  0.156673
+# salutation_res = train[['Salutation','Survived']].groupby(['Salutation'],as_index=False).mean().sort_values(by='Survived',ascending=False)
+# print(salutation_res)
+Salutation_mapping = {"Mr": 1, "Miss": 2, "Mrs": 3, "Master": 4, "Rare": 5}
+
+for dataSet in combine:
+	dataSet['Salutation'] = dataSet['Salutation'].map(Salutation_mapping)
+
+
+
+train = train.drop(['Name','FareBand'],axis=1)
+test = test.drop(['Name'],axis=1)
+combine = [train,test]
+print(combine)
