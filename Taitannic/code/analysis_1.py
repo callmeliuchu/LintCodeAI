@@ -187,4 +187,5 @@ for dataSet in combine:
 train = train.drop(['Name','FareBand'],axis=1)
 test = test.drop(['Name'],axis=1)
 combine = [train,test]
-print(combine)
+# print(combine)
+

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+</body>
+<script type="text/javascript">
+     function getRandColor(){
+       var colorList = [
+       '#C1232B','#B5C334','#FCCE10','#E87C25','#27727B',
+       '#FE8463','#9BCA63','#FAD860','#F3A43B','#60C0DD',
+       '#D7504B','#C6E579','#F4E001','#F0805A','#26C0C0'
+       ];
+        return  colorList[Math.floor((Math.random()*colorList.length))];
+     }
+    class Point{
+    	constructor(x,y){
+    		this.x = x
+    		this.y = y
+    	}
+    }
+    class Cycle{
+    	constructor(x,y,radius){
+    		this.x = x
+    		this.y = y
+    		this.radius = radius
+    	}
+    }
+    class DrawTool{
+    	constructor(canvas,ctx){
+    		this.canvas = canvas
+    		this.ctx = ctx
+    	}
+    	init(width=1800,height=1600){
+    		this.width = width
+    		this.height = height
+    		this.canvas.width = width
+    		this.canvas.height = height
+    	}
+          drawLine(p1,p2,width=1,color="#000000"){
+             this.beginPath()
+	         this.ctx.moveTo(p1.x,p1.y);
+	         this.ctx.lineTo(p2.x,p2.y);
+	         this.ctx.strokeStyle=color;
+	         this.ctx.lineWidth=width;
+	         this.stroke()
+         }
+         clear(){
+            this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
+         }
+         beginPath(){
+            this.ctx.beginPath()
+         }
+         stroke(){
+            this.ctx.stroke();
+         }
+         drawCycleByLocation(rx,ry,radius){
+	         this.beginPath()
+	         this.ctx.arc(rx, ry, radius, 0, Math.PI*2, true)
+	         this.stroke()
+          }
+         drawCycleByFillingColor(x,y,radius,color='#0000ff'){
+	        let colorObj = this.ctx.createRadialGradient(x-radius/1.8,y-radius/1.8,0,x,y,radius)
+	        colorObj.addColorStop(0,"#FFFFFF")
+	        colorObj.addColorStop(1,color)
+	        this.ctx.fillStyle = colorObj
+	        this.drawCycleByLocation(x,y,radius)
+	        this.ctx.fill()
+         }
+         drawParaCurv(p_start,p_end,paraYBase,baseRotate){
+	        const len_x = Math.abs(p_start.x - p_end.x)
+	        const x0 = p_start.x
+	        const x1 = p_end.x
+	        const y0 = p_start.y
+	        this.beginPath()
+	        const n = 100
+	        this.ctx.moveTo(p_start.x,p_start.y);
+	        let alpha = Math.atan((p_start.y-p_end.y)/(p_start.x - p_end.x))
+	        for(let i=1;i<=n;i++){
+	            let x = len_x/n*i+x0
+	            let y = paraYBase(x-x0,len_x)+y0
+	            let new_loc = baseRotate(x-x0,y-y0,alpha)
+	            this.ctx.lineTo(new_loc.x+x0,new_loc.y+y0)
+	        }
+	        this.stroke()
+          }
+          drawCycle(circle,color='#0000ff'){
+          	  this.drawCycleByFillingColor(circle.x,circle.y,circle.radius,color)
+          }
+          fillText(x,y,text){
+    	      this.ctx.fillText(x,y,text)
+         }
+     }
+
+     class NewDrawTool{
+     	constructor(oldTool,scale){
+     		this.centerLocation = scale.centerLocation()
+     		this.drawTool = oldTool
+     		this.scale = scale
+     		this.initZ()
+     		this.initCanvas()
+     	}
+     	initCanvas(){
+     		this.drawTool.drawLine(new Point(this.centerLocation.x*this.z_x,0),new Point(this.centerLocation.x*this.z_x,this.drawTool.height))
+     		this.drawTool.drawLine(new Point(0,this.centerLocation.y*this.z_y),new Point(this.drawTool.width,this.centerLocation.y*this.z_y))    		
+     	}
+     	initZ(){
+      		let oldScale_width = this.drawTool.width
+     		let oldScale_height = this.drawTool.height
+     		this.z_x = oldScale_width/this.scale.width
+     		this.z_y = oldScale_height/this.scale.height    		
+     	}
+     	convertLocation(x,y){
+     		return {x:x*this.z_x,y:y*this.z_y}
+     	}
+     	drawCycle(cycle){
+     		let new_loc = this.convertLocation(cycle.x+this.centerLocation.x,this.centerLocation.y-cycle.y)
+     		this.drawTool.drawCycleByFillingColor(new_loc.x,new_loc.y,cycle.radius)
+     	}
+     }
+
+     class Box{
+     	constructor(width,height){
+     		this.width = width
+     		this.height = height
+     	}
+     	centerLocation(){
+     		return {x:this.width/2,y:this.height/2}
+     	}
+     }
+
+
+     const canvas = document.getElementById('canvas')
+     const ctx = canvas.getContext("2d")
+     drawTool = new DrawTool(canvas,ctx)
+     drawTool.init(800,600)
+     const box = new Box(800,600)
+     const newDrawTool = new NewDrawTool(drawTool,box)
+     newDrawTool.drawCycle(new Cycle(200,200,10))
+     // const cycle = new Cycle(400,300,10)
+     // drawTool.drawCycle(cycle)
+</script>
+</html>
